@@ -32,7 +32,7 @@ export default function Login() {
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Ionicons name="globe-outline" size={24} color="white" />
-          <Text style={styles.logoText}>DemoSite</Text>
+          <Text style={styles.logoText}>InvoiceNexus</Text>
         </View>
       </View>
 

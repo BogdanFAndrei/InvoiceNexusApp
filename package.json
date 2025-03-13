@@ -1,5 +1,5 @@
 {
-  "name": "demo_invoice_app",
+  "name": "invoicenexus",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {

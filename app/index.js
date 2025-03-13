@@ -14,18 +14,16 @@ export default function Home() {
       
       {/* Header/Logo */}
       <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Ionicons name="globe-outline" size={24} color="white" />
-          <Text style={styles.logoText}>DemoSite</Text>
-        </View>
+        <Text style={styles.headerTitle}>InvoiceNexus</Text>
+        <Text style={styles.headerSubtitle}>Smart Invoice Management</Text>
       </View>
 
       {/* Main Content */}
       <View style={styles.mainContent}>
         <View style={styles.triangle} />
-        <Text style={styles.title}>Welcome to my Demo website</Text>
+        <Text style={styles.title}>Welcome to InvoiceNexus</Text>
         <Text style={styles.subtitle}>
-          I will be using this website to test different test frameworks.
+          The place where we make Invoices smarter.
         </Text>
         
         {/* Login Button */}
@@ -51,15 +49,16 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 48,
   },
-  logoContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  headerTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
   },
-  logoText: {
-    color: 'white',
-    fontSize: 24,
-    fontWeight: '500',
+  headerSubtitle: {
+    fontSize: 16,
+    color: '#fff',
+    opacity: 0.9,
   },
   mainContent: {
     flex: 1,
