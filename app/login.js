@@ -1,37 +1,27 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Modal, Animated } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useState, useRef } from 'react';
-
-const THEME_COLORS = {
-  blue: '#4285f4',
-  purple: '#8a2be2',
-  green: '#34a853',
-  red: '#ea4335',
-  yellow: '#fbbc05',
-  pink: '#ff69b4',
-};
+import { useState } from 'react';
 
 export default function Login() {
-  const [themeColor, setThemeColor] = useState('#4285f4');
-  const [showColorPicker, setShowColorPicker] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const scaleAnim = useRef(new Animated.Value(0)).current;
   const router = useRouter();
 
-  const toggleColorPicker = () => {
-    setShowColorPicker(!showColorPicker);
-    Animated.spring(scaleAnim, {
-      toValue: showColorPicker ? 0 : 1,
-      useNativeDriver: true,
-    }).start();
-  };
-
   const handleLogin = () => {
-    // Add login logic here
-    console.log('Login with:', email, password);
+    // Simple demo login logic
+    if (email === 'user@nextmail.com' && password === '123456') {
+      router.push('/admin-dashboard');
+    } else if (email === 'customer@demo.com' && password === 'customer123') {
+      router.push('/customer-dashboard');
+    } else {
+      Alert.alert(
+        'Login Failed',
+        'Invalid email or password. Please try again.',
+        [{ text: 'OK' }]
+      );
+    }
   };
 
   return (
@@ -39,7 +29,7 @@ export default function Login() {
       <StatusBar style="dark" />
       
       {/* Header/Logo */}
-      <View style={[styles.header, { backgroundColor: themeColor }]}>
+      <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Ionicons name="globe-outline" size={24} color="white" />
           <Text style={styles.logoText}>DemoSite</Text>
@@ -82,7 +72,7 @@ export default function Login() {
             </View>
 
             <TouchableOpacity 
-              style={[styles.loginButton, { backgroundColor: themeColor }]}
+              style={styles.loginButton}
               onPress={handleLogin}
             >
               <Text style={styles.loginButtonText}>Log in</Text>
@@ -90,57 +80,21 @@ export default function Login() {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={[styles.backButton]}
+              style={styles.backButton}
               onPress={() => router.push("/")}
             >
               <Ionicons name="arrow-back" size={20} color="#666" />
               <Text style={styles.backButtonText}>Back to Home</Text>
             </TouchableOpacity>
+
+            <View style={styles.demoCredentials}>
+              <Text style={styles.demoTitle}>Demo Credentials:</Text>
+              <Text style={styles.demoText}>Admin: user@nextmail.com / 123456</Text>
+              <Text style={styles.demoText}>Customer: customer@demo.com / customer123</Text>
+            </View>
           </View>
         </View>
       </View>
-
-      {/* Color Picker Button */}
-      <TouchableOpacity 
-        style={styles.colorPickerButton}
-        onPress={toggleColorPicker}
-      >
-        <Ionicons name="color-palette" size={24} color="white" />
-      </TouchableOpacity>
-
-      {/* Color Picker Menu */}
-      <Modal
-        transparent
-        visible={showColorPicker}
-        animationType="fade"
-        onRequestClose={() => setShowColorPicker(false)}
-      >
-        <TouchableOpacity 
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setShowColorPicker(false)}
-        >
-          <Animated.View 
-            style={[
-              styles.colorPickerMenu,
-              {
-                transform: [{ scale: scaleAnim }],
-              }
-            ]}
-          >
-            {Object.entries(THEME_COLORS).map(([name, color]) => (
-              <TouchableOpacity
-                key={name}
-                style={[styles.colorOption, { backgroundColor: color }]}
-                onPress={() => {
-                  setThemeColor(color);
-                  setShowColorPicker(false);
-                }}
-              />
-            ))}
-          </Animated.View>
-        </TouchableOpacity>
-      </Modal>
     </View>
   );
 }
@@ -226,55 +180,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '500',
   },
-  colorPickerButton: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    backgroundColor: '#333',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  colorPickerMenu: {
-    backgroundColor: 'white',
-    padding: 16,
-    borderRadius: 16,
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 12,
-    width: '80%',
-    maxWidth: 300,
-    justifyContent: 'center',
-  },
-  colorOption: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
-  },
   backButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -287,5 +192,22 @@ const styles = StyleSheet.create({
     color: '#666',
     fontSize: 16,
     fontWeight: '500',
+  },
+  demoCredentials: {
+    marginTop: 32,
+    padding: 16,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+  },
+  demoTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
+  },
+  demoText: {
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 4,
   },
 }); 
