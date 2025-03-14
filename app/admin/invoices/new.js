@@ -86,7 +86,7 @@ const NewInvoiceScreen = () => {
     if (validateForm()) {
       // Here we'll add the logic to save the invoice
       console.log('Form submitted:', formData);
-      router.back();
+      router.push('/admin/invoices');
     }
   };
 
