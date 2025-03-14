@@ -13,10 +13,64 @@ const NewCustomerScreen = () => {
     address: '',
   });
 
+  const [errors, setErrors] = useState({
+    name: '',
+    email: '',
+    phone: '',
+  });
+
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      name: '',
+      email: '',
+      phone: '',
+    };
+
+    // Validate name
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required';
+      isValid = false;
+    }
+
+    // Validate email
+    if (!formData.email.trim()) {
+      newErrors.email = 'Email is required';
+      isValid = false;
+    } else {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formData.email)) {
+        newErrors.email = 'Please enter a valid email address';
+        isValid = false;
+      }
+    }
+
+    // Validate phone if provided
+    if (formData.phone.trim()) {
+      const phoneRegex = /^\+?[\d\s-]{10,}$/;
+      if (!phoneRegex.test(formData.phone)) {
+        newErrors.phone = 'Please enter a valid phone number';
+        isValid = false;
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSubmit = () => {
-    // Here we'll add the logic to save the customer
-    console.log('Form submitted:', formData);
-    router.back(); // Go back to customer list
+    if (validateForm()) {
+      // Here we'll add the logic to save the customer
+      console.log('Form submitted:', formData);
+      router.back();
+    }
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData({ ...formData, [field]: value });
+    if (errors[field]) {
+      setErrors({ ...errors, [field]: '' });
+    }
   };
 
   return (
@@ -35,22 +89,29 @@ const NewCustomerScreen = () => {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Name *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, errors.name ? styles.inputError : null]}
             value={formData.name}
-            onChangeText={(text) => setFormData({ ...formData, name: text })}
+            onChangeText={(text) => handleInputChange('name', text)}
             placeholder="Enter customer name"
           />
+          {errors.name ? (
+            <Text style={styles.errorText}>{errors.name}</Text>
+          ) : null}
         </View>
 
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Email *</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, errors.email ? styles.inputError : null]}
             value={formData.email}
-            onChangeText={(text) => setFormData({ ...formData, email: text })}
+            onChangeText={(text) => handleInputChange('email', text)}
             placeholder="Enter email address"
             keyboardType="email-address"
+            autoCapitalize="none"
           />
+          {errors.email ? (
+            <Text style={styles.errorText}>{errors.email}</Text>
+          ) : null}
         </View>
 
         <View style={styles.inputGroup}>
@@ -58,7 +119,7 @@ const NewCustomerScreen = () => {
           <TextInput
             style={styles.input}
             value={formData.company}
-            onChangeText={(text) => setFormData({ ...formData, company: text })}
+            onChangeText={(text) => handleInputChange('company', text)}
             placeholder="Enter company name"
           />
         </View>
@@ -66,12 +127,15 @@ const NewCustomerScreen = () => {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Phone</Text>
           <TextInput
-            style={styles.input}
+            style={[styles.input, errors.phone ? styles.inputError : null]}
             value={formData.phone}
-            onChangeText={(text) => setFormData({ ...formData, phone: text })}
+            onChangeText={(text) => handleInputChange('phone', text)}
             placeholder="Enter phone number"
             keyboardType="phone-pad"
           />
+          {errors.phone ? (
+            <Text style={styles.errorText}>{errors.phone}</Text>
+          ) : null}
         </View>
 
         <View style={styles.inputGroup}>
@@ -79,7 +143,7 @@ const NewCustomerScreen = () => {
           <TextInput
             style={[styles.input, styles.textArea]}
             value={formData.address}
-            onChangeText={(text) => setFormData({ ...formData, address: text })}
+            onChangeText={(text) => handleInputChange('address', text)}
             placeholder="Enter address"
             multiline
             numberOfLines={4}
@@ -136,6 +200,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e0e0e0',
     fontSize: 16,
+  },
+  inputError: {
+    borderColor: '#dc3545',
+    borderWidth: 1,
+  },
+  errorText: {
+    color: '#dc3545',
+    fontSize: 14,
+    marginTop: 4,
   },
   textArea: {
     height: 100,

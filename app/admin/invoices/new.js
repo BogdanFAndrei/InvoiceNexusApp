@@ -12,6 +12,13 @@ const NewInvoiceScreen = () => {
     dueDate: '',
     notes: '',
   });
+  
+  const [errors, setErrors] = useState({
+    customerId: '',
+    amount: '',
+    dueDate: '',
+  });
+  
   const [showCustomerPicker, setShowCustomerPicker] = useState(false);
 
   // Dummy customers data - replace with your actual customers data
@@ -20,19 +27,67 @@ const NewInvoiceScreen = () => {
     { id: '2', name: 'Jane Smith', email: 'jane@example.com' },
   ];
 
+  const validateForm = () => {
+    let isValid = true;
+    const newErrors = {
+      customerId: '',
+      amount: '',
+      dueDate: '',
+    };
+
+    // Validate customer selection
+    if (!formData.customerId) {
+      newErrors.customerId = 'Please select a customer';
+      isValid = false;
+    }
+
+    // Validate amount
+    if (!formData.amount) {
+      newErrors.amount = 'Please enter an amount';
+      isValid = false;
+    } else if (isNaN(parseFloat(formData.amount)) || parseFloat(formData.amount) <= 0) {
+      newErrors.amount = 'Please enter a valid amount';
+      isValid = false;
+    }
+
+    // Validate due date if provided
+    if (formData.dueDate) {
+      const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+      if (!dateRegex.test(formData.dueDate)) {
+        newErrors.dueDate = 'Please use YYYY-MM-DD format';
+        isValid = false;
+      } else {
+        const date = new Date(formData.dueDate);
+        if (isNaN(date.getTime())) {
+          newErrors.dueDate = 'Please enter a valid date';
+          isValid = false;
+        }
+      }
+    }
+
+    setErrors(newErrors);
+    return isValid;
+  };
+
   const handleSelectCustomer = (customer) => {
     setFormData({
       ...formData,
       customerId: customer.id,
       customerName: customer.name,
     });
+    setErrors({
+      ...errors,
+      customerId: '',
+    });
     setShowCustomerPicker(false);
   };
 
   const handleSubmit = () => {
-    // Here we'll add the logic to save the invoice
-    console.log('Form submitted:', formData);
-    router.back();
+    if (validateForm()) {
+      // Here we'll add the logic to save the invoice
+      console.log('Form submitted:', formData);
+      router.back();
+    }
   };
 
   return (
@@ -52,7 +107,11 @@ const NewInvoiceScreen = () => {
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Customer *</Text>
           <TouchableOpacity
-            style={[styles.input, styles.customerPicker]}
+            style={[
+              styles.input, 
+              styles.customerPicker,
+              errors.customerId ? styles.inputError : null
+            ]}
             onPress={() => setShowCustomerPicker(true)}
           >
             <Text style={formData.customerName ? styles.customerSelected : styles.customerPlaceholder}>
@@ -60,32 +119,57 @@ const NewInvoiceScreen = () => {
             </Text>
             <Ionicons name="chevron-down" size={20} color="#666" />
           </TouchableOpacity>
+          {errors.customerId ? (
+            <Text style={styles.errorText}>{errors.customerId}</Text>
+          ) : null}
         </View>
 
         {/* Amount Input */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Amount *</Text>
-          <View style={styles.amountContainer}>
+          <View style={[
+            styles.amountContainer,
+            errors.amount ? styles.inputError : null
+          ]}>
             <Text style={styles.currencySymbol}>$</Text>
             <TextInput
               style={styles.amountInput}
               value={formData.amount}
-              onChangeText={(text) => setFormData({ ...formData, amount: text })}
+              onChangeText={(text) => {
+                setFormData({ ...formData, amount: text });
+                if (errors.amount) {
+                  setErrors({ ...errors, amount: '' });
+                }
+              }}
               placeholder="0.00"
               keyboardType="decimal-pad"
             />
           </View>
+          {errors.amount ? (
+            <Text style={styles.errorText}>{errors.amount}</Text>
+          ) : null}
         </View>
 
         {/* Due Date */}
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Due Date</Text>
           <TextInput
-            style={styles.input}
+            style={[
+              styles.input,
+              errors.dueDate ? styles.inputError : null
+            ]}
             value={formData.dueDate}
-            onChangeText={(text) => setFormData({ ...formData, dueDate: text })}
+            onChangeText={(text) => {
+              setFormData({ ...formData, dueDate: text });
+              if (errors.dueDate) {
+                setErrors({ ...errors, dueDate: '' });
+              }
+            }}
             placeholder="YYYY-MM-DD"
           />
+          {errors.dueDate ? (
+            <Text style={styles.errorText}>{errors.dueDate}</Text>
+          ) : null}
         </View>
 
         {/* Notes */}
@@ -187,6 +271,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#e0e0e0',
     fontSize: 16,
+  },
+  inputError: {
+    borderColor: '#dc3545',
+    borderWidth: 1,
+  },
+  errorText: {
+    color: '#dc3545',
+    fontSize: 14,
+    marginTop: 4,
   },
   customerPicker: {
     flexDirection: 'row',
