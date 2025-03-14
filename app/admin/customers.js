@@ -1,15 +1,35 @@
 import { View, Text, TouchableOpacity, StyleSheet, FlatList } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
+import { useState, useEffect } from 'react';
 
 const CustomersScreen = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
   
-  // Dummy data for demonstration - later we can replace with real data
-  const customers = [
+  // Initialize with dummy data
+  const [customers, setCustomers] = useState([
     { id: '1', name: 'John Doe', email: 'john@example.com', company: 'Tech Corp' },
     { id: '2', name: 'Jane Smith', email: 'jane@example.com', company: 'Design Co' },
-  ];
+  ]);
+
+  // Check for new customer data from params
+  useEffect(() => {
+    if (params.newCustomer) {
+      const newCustomerData = JSON.parse(params.newCustomer);
+      setCustomers(currentCustomers => [
+        {
+          id: (currentCustomers.length + 1).toString(),
+          name: newCustomerData.name,
+          email: newCustomerData.email,
+          company: newCustomerData.company,
+          phone: newCustomerData.phone,
+          address: newCustomerData.address,
+        },
+        ...currentCustomers
+      ]);
+    }
+  }, [params.newCustomer]);
 
   const renderCustomerItem = ({ item }) => (
     <TouchableOpacity 
@@ -18,7 +38,7 @@ const CustomersScreen = () => {
     >
       <View style={styles.customerInfo}>
         <Text style={styles.customerName}>{item.name}</Text>
-        <Text style={styles.customerDetails}>{item.company}</Text>
+        <Text style={styles.customerDetails}>{item.company || 'No company'}</Text>
         <Text style={styles.customerEmail}>{item.email}</Text>
       </View>
       <Ionicons name="chevron-forward" size={24} color="#666" />
@@ -28,7 +48,15 @@ const CustomersScreen = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Customers</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity 
+            style={styles.backButton} 
+            onPress={() => router.back()}
+          >
+            <Ionicons name="arrow-back" size={24} color="#000" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Customers</Text>
+        </View>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={() => router.push('/admin/customers/new')}
@@ -61,6 +89,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 16,
+    padding: 4,
   },
   headerTitle: {
     fontSize: 24,

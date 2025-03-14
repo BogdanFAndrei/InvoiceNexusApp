@@ -60,9 +60,11 @@ const NewCustomerScreen = () => {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      // Here we'll add the logic to save the customer
-      console.log('Form submitted:', formData);
-      router.back();
+      // Navigate to customers list with the new customer data
+      router.push({
+        pathname: '/admin/customers',
+        params: { newCustomer: JSON.stringify(formData) }
+      });
     }
   };
 
