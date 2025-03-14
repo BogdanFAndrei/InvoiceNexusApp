@@ -3,8 +3,24 @@ import { StatusBar } from 'expo-status-bar';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function AdminDashboard() {
+const AdminDashboard = () => {
   const router = useRouter();
+
+  const menuItems = [
+    {
+      title: 'Customers',
+      icon: 'people',
+      route: '/admin/customers',
+      description: 'Manage customer profiles and information',
+    },
+    {
+      title: 'Invoices',
+      icon: 'document-text',
+      route: '/admin/invoices',
+      description: 'Create and manage invoices',
+    },
+    // Add more menu items as needed
+  ];
 
   const handleLogout = () => {
     router.push('/');
@@ -74,33 +90,18 @@ export default function AdminDashboard() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Quick Actions</Text>
           <View style={styles.actionGrid}>
-            <TouchableOpacity style={styles.actionCard}>
-              <View style={[styles.actionIcon, { backgroundColor: '#e3f2fd' }]}>
-                <Ionicons name="person-add-outline" size={24} color="#4285f4" />
-              </View>
-              <Text style={styles.actionText}>Add User</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionCard}>
-              <View style={[styles.actionIcon, { backgroundColor: '#e8f5e9' }]}>
-                <Ionicons name="document-text-outline" size={24} color="#34a853" />
-              </View>
-              <Text style={styles.actionText}>Create Invoice</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionCard}>
-              <View style={[styles.actionIcon, { backgroundColor: '#fff3e0' }]}>
-                <Ionicons name="settings-outline" size={24} color="#fbbc05" />
-              </View>
-              <Text style={styles.actionText}>Settings</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.actionCard}>
-              <View style={[styles.actionIcon, { backgroundColor: '#fce4ec' }]}>
-                <Ionicons name="analytics-outline" size={24} color="#ea4335" />
-              </View>
-              <Text style={styles.actionText}>Reports</Text>
-            </TouchableOpacity>
+            {menuItems.map((item, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.actionCard}
+                onPress={() => router.push(item.route)}
+              >
+                <View style={[styles.actionIcon, { backgroundColor: '#e3f2fd' }]}>
+                  <Ionicons name={item.icon} size={24} color="#4285f4" />
+                </View>
+                <Text style={styles.actionText}>{item.title}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
@@ -125,7 +126,7 @@ export default function AdminDashboard() {
       </ScrollView>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -295,4 +296,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666',
   },
-}); 
+});
+
+export default AdminDashboard; 
