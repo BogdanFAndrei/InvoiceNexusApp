@@ -84,9 +84,19 @@ const NewInvoiceScreen = () => {
 
   const handleSubmit = () => {
     if (validateForm()) {
-      // Here we'll add the logic to save the invoice
-      console.log('Form submitted:', formData);
-      router.push('/admin/invoices');
+      // Create the invoice data
+      const invoiceData = {
+        customerName: formData.customerName,
+        amount: formData.amount,
+        dueDate: formData.dueDate,
+        notes: formData.notes
+      };
+
+      // Navigate to invoices list with the new invoice data
+      router.push({
+        pathname: '/admin/invoices',
+        params: { newInvoice: JSON.stringify(invoiceData) }
+      });
     }
   };
 

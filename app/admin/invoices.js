@@ -1,12 +1,13 @@
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const InvoicesScreen = () => {
   const router = useRouter();
+  const params = useLocalSearchParams();
   
-  // Dummy data for demonstration - later we can replace with real data
+  // Initialize with dummy data
   const [invoices, setInvoices] = useState([
     { 
       id: '1', 
@@ -23,6 +24,24 @@ const InvoicesScreen = () => {
       status: 'paid'
     },
   ]);
+
+  // Check for new invoice data from params
+  useEffect(() => {
+    if (params.newInvoice) {
+      const newInvoiceData = JSON.parse(params.newInvoice);
+      setInvoices(currentInvoices => [
+        {
+          id: (currentInvoices.length + 1).toString(),
+          customerName: newInvoiceData.customerName,
+          amount: parseFloat(newInvoiceData.amount),
+          date: newInvoiceData.dueDate || new Date().toISOString().split('T')[0],
+          status: 'pending',
+          notes: newInvoiceData.notes
+        },
+        ...currentInvoices
+      ]);
+    }
+  }, [params.newInvoice]);
 
   const handleDeleteInvoice = (invoiceId) => {
     Alert.alert(
