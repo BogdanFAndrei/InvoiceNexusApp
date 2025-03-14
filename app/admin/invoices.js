@@ -2,45 +2,71 @@ import { View, Text, TouchableOpacity, StyleSheet, FlatList, Alert } from 'react
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const INVOICES_STORAGE_KEY = '@invoicenexus_invoices';
 
 const InvoicesScreen = () => {
   const router = useRouter();
   const params = useLocalSearchParams();
-  
-  // Initialize with dummy data
-  const [invoices, setInvoices] = useState([
-    { 
-      id: '1', 
-      customerName: 'John Doe',
-      amount: 1500.00,
-      date: '2024-03-15',
-      status: 'pending'
-    },
-    { 
-      id: '2', 
-      customerName: 'Jane Smith',
-      amount: 2300.50,
-      date: '2024-03-14',
-      status: 'paid'
-    },
-  ]);
+  const [invoices, setInvoices] = useState([]);
+
+  // Load saved invoices when component mounts
+  useEffect(() => {
+    loadInvoices();
+  }, []);
+
+  // Load invoices from AsyncStorage
+  const loadInvoices = async () => {
+    try {
+      const savedInvoices = await AsyncStorage.getItem(INVOICES_STORAGE_KEY);
+      if (savedInvoices) {
+        setInvoices(JSON.parse(savedInvoices));
+      }
+    } catch (error) {
+      console.error('Error loading invoices:', error);
+    }
+  };
+
+  // Save invoices to AsyncStorage
+  const saveInvoices = async (updatedInvoices) => {
+    try {
+      await AsyncStorage.setItem(INVOICES_STORAGE_KEY, JSON.stringify(updatedInvoices));
+    } catch (error) {
+      console.error('Error saving invoices:', error);
+    }
+  };
 
   // Check for new invoice data from params
   useEffect(() => {
-    if (params.newInvoice) {
-      const newInvoiceData = JSON.parse(params.newInvoice);
-      setInvoices(currentInvoices => [
-        {
-          id: (currentInvoices.length + 1).toString(),
-          customerName: newInvoiceData.customerName,
-          amount: parseFloat(newInvoiceData.amount),
-          date: newInvoiceData.dueDate || new Date().toISOString().split('T')[0],
-          status: 'pending',
-          notes: newInvoiceData.notes
-        },
-        ...currentInvoices
-      ]);
-    }
+    const handleNewInvoice = async () => {
+      if (params.newInvoice) {
+        try {
+          const savedInvoices = await AsyncStorage.getItem(INVOICES_STORAGE_KEY) || '[]';
+          const currentInvoices = JSON.parse(savedInvoices);
+          
+          const newInvoiceData = JSON.parse(params.newInvoice);
+          const updatedInvoices = [
+            {
+              id: Date.now().toString(),
+              customerName: newInvoiceData.customerName,
+              amount: parseFloat(newInvoiceData.amount),
+              date: newInvoiceData.dueDate || new Date().toISOString().split('T')[0],
+              status: 'pending',
+              notes: newInvoiceData.notes
+            },
+            ...currentInvoices
+          ];
+          
+          await saveInvoices(updatedInvoices);
+          setInvoices(updatedInvoices);
+        } catch (error) {
+          console.error('Error adding new invoice:', error);
+        }
+      }
+    };
+
+    handleNewInvoice();
   }, [params.newInvoice]);
 
   const handleDeleteInvoice = (invoiceId) => {
@@ -54,10 +80,10 @@ const InvoicesScreen = () => {
         },
         {
           text: "Delete",
-          onPress: () => {
-            setInvoices(currentInvoices => 
-              currentInvoices.filter(invoice => invoice.id !== invoiceId)
-            );
+          onPress: async () => {
+            const updatedInvoices = invoices.filter(invoice => invoice.id !== invoiceId);
+            setInvoices(updatedInvoices);
+            await saveInvoices(updatedInvoices);
           },
           style: "destructive"
         }
